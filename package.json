@@ -18,6 +18,7 @@
   "homepage": "https://github.com/projectweekend/Stall-Monitor-Slack-Bot#readme",
   "dependencies": {
     "async": "1.5.2",
+    "minimist": "1.2.0",
     "slack-client": "1.5.1"
   }
 }
