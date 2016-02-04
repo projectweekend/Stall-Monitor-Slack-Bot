@@ -45,6 +45,7 @@ function main() {
                     channel.send("You're good to go!");
                 }
                 q.push(task);
+                services.stall.pooq();
             }
         });
     });
@@ -84,7 +85,9 @@ function userInQ(q, user) {
 
 function connectStall(conf) {
     return function(done) {
-        var s = new Stall(picloud.socket(conf));
+        var subSocket = picloud.socket(conf.sub);
+        var pubSocket = picloud.socket(conf.pub);
+        var s = new Stall(subSocket, pubSocket);
         s.once('ready', function () {
             console.log('Stall connected');
             done(null, s);
