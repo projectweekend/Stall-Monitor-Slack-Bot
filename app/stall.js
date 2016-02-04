@@ -30,10 +30,7 @@ Stall.prototype._setupPicloudSocket = function () {
     });
     _this._socket.on('message', function(data) {
         var message = JSON.parse(data);
-        if (message.data != _this.status) {
-            _this.status = message.data;
-            _this.emit(_this.status);
-        }
+        _this.status = message.data;
         _this.emit('ready');
     });
 };
