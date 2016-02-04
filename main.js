@@ -5,6 +5,13 @@ var config = require('./app/config');
 var picloud = require('./app/picloud');
 var Stall = require('./app/stall').Stall;
 
+var configFilePath = argv.c;
+if (!configFilePath) {
+    logger.info('Config file path must be provided with the -c argument');
+    process.exit(1);
+}
+var appConf = config.fromFile(configFilePath);
+
 
 if (require.main === module) {
     main();
@@ -12,15 +19,8 @@ if (require.main === module) {
 
 
 function main() {
-    var configFilePath = argv.c;
-    if (!configFilePath) {
-        logger.info('Config file path must be provided with the -c argument');
-        process.exit(1);
-    }
 
     var q = async.queue(worker, 1);
-
-    var appConf = config.fromFile(configFilePath);
 
     async.parallel({
         stall: connectStall(appConf.picloud),
@@ -59,7 +59,7 @@ function worker(task, cb) {
                 clearInterval(i);
                 startCountdown(cb);
             }
-        }, 100);
+        }, appConf.app.statusInterval);
     } else {
         startCountdown(cb);
     }
@@ -120,5 +120,5 @@ function startCountdown(cb) {
     setTimeout(function() {
         console.log('timeout expired');
         cb();
-    }, 60000);
+    }, appConf.app.countdownDelay);
 }
