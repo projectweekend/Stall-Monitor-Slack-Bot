@@ -1,0 +1,19 @@
+{
+  "name": "stall-monitor-slack-bot",
+  "version": "1.0.0",
+  "description": "Vokal Stall Monitor Slackbot",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/projectweekend/Stall-Monitor-Slack-Bot.git"
+  },
+  "author": "Brian Hines",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/projectweekend/Stall-Monitor-Slack-Bot/issues"
+  },
+  "homepage": "https://github.com/projectweekend/Stall-Monitor-Slack-Bot#readme"
+}

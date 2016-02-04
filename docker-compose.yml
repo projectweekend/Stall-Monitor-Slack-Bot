@@ -1,0 +1,6 @@
+bot:
+    build: .
+    command: node main.js
+    volumes:
+        - ./main.js:/src/main.js
+        - ./app:/src/app
