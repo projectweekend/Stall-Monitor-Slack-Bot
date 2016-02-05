@@ -90,6 +90,20 @@ function worker(task, cb) {
 }
 
 
+function startCountdown(task, cb) {
+    console.log('timeout started');
+    setTimeout(function() {
+        console.log('timeout expired');
+        var stallOpen = task.stall.status === 'open';
+        var peopleWaiting = q.length() > 0;
+        if (stallOpen && peopleWaiting) {
+            task.channel.send(utils.randomFromArray(appConf.app.messages.missedChance));
+        }
+        cb();
+    }, appConf.app.countdownDelay);
+}
+
+
 function userTaskInQ(q, user) {
     var inProcess = q.workersList();
     for (var i = 0; i < inProcess.length; i++) {
@@ -154,18 +168,4 @@ function connectSlack(conf) {
         });
         s.login();
     };
-}
-
-
-function startCountdown(task, cb) {
-    console.log('timeout started');
-    setTimeout(function() {
-        console.log('timeout expired');
-        var stallOpen = task.stall.status === 'open';
-        var peopleWaiting = q.length() > 0;
-        if (stallOpen && peopleWaiting) {
-            task.channel.send(utils.randomFromArray(appConf.app.messages.missedChance));
-        }
-        cb();
-    }, appConf.app.countdownDelay);
 }
