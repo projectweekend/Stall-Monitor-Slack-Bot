@@ -23,9 +23,10 @@ if (require.main === module) {
 }
 
 
-function main() {
+var q = async.queue(worker, 1);
 
-    var q = async.queue(worker, 1);
+
+function main() {
 
     async.parallel({
         stall: connectStall(appConf.picloud),
@@ -80,11 +81,11 @@ function worker(task, cb) {
                 task.channel.send(utils.randomFromArray(appConf.app.messages.yourTurn));
                 clearInterval(i);
                 task.pooqStatus = 'go';
-                startCountdown(cb);
+                startCountdown(task, cb);
             }
         }, appConf.app.statusInterval);
     } else if (task.pooqStatus === 'go') {
-        startCountdown(cb);
+        startCountdown(task, cb);
     }
 }
 
@@ -156,10 +157,15 @@ function connectSlack(conf) {
 }
 
 
-function startCountdown(cb) {
+function startCountdown(task, cb) {
     console.log('timeout started');
     setTimeout(function() {
         console.log('timeout expired');
+        var stallOpen = task.stall.status === 'open';
+        var peopleWaiting = q.length() > 0;
+        if (stallOpen && peopleWaiting) {
+            task.channel.send(utils.randomFromArray(appConf.app.messages.missedChance));
+        }
         cb();
     }, appConf.app.countdownDelay);
 }
