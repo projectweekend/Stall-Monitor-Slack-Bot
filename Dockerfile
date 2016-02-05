@@ -3,4 +3,4 @@ ADD ./package.json /src/
 RUN cd /src && npm install
 ADD . /src/
 WORKDIR /src
-CMD ["node", "main.js"]
+ENTRYPOINT ["node", "main.js"]
