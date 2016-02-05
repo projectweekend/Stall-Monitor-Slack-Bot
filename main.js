@@ -34,6 +34,10 @@ function main() {
     }, function(err, services) {
         services.slack.on('message', function (message) {
             var channel = services.slack.getChannelGroupOrDMByID(message.channel);
+            // don't respond if pooq is in a channel, like 'random'
+            if (channel.is_channel) {
+                return;
+            }
             var user = message.user;
             if (message.text !== appConf.app.keyword) {
                 channel.send(appConf.app.messages.help);
