@@ -4,6 +4,8 @@ var Slack = require('slack-client');
 var config = require('./app/config');
 var utils = require('./app/utils');
 var Stall = require('./app/stall').Stall;
+var PiCloud = require('./app/picloud').PiCloud;
+
 
 var configFilePath = argv.c;
 if (!configFilePath) {
@@ -24,6 +26,7 @@ function main() {
 
     async.parallel({
         stall: connectStall(appConf.picloud),
+        picloud: connectPiCloud(appConf.picloud),
         slack: connectSlack(appConf.bot)
     }, function(err, services) {
         services.slack.on('message', function (message) {
@@ -45,7 +48,7 @@ function main() {
                     channel.send("You're good to go!");
                 }
                 q.push(task);
-                services.stall.pooq();
+                services.picloud.pooq();
             }
         });
     });
@@ -85,9 +88,8 @@ function userInQ(q, user) {
 
 function connectStall(conf) {
     return function(done) {
-        var subSocket = utils.socket(conf.sub);
-        var pubSocket = utils.socket(conf.pub);
-        var s = new Stall(subSocket, pubSocket);
+        var socket = utils.socket(conf.sub);
+        var s = new Stall(socket);
         s.once('ready', function () {
             console.log('Stall connected');
             done(null, s);
@@ -96,6 +98,23 @@ function connectStall(conf) {
             console.log('Stall error');
             console.log(err);
             process.exit(101);
+        });
+    };
+}
+
+
+function connectPiCloud(conf) {
+    return function(done) {
+        var socket = utils.socket(conf.pub);
+        var p = new PiCloud(socket);
+        p.once('ready', function () {
+            console.log('PiCloud connected');
+            done(null, p);
+        });
+        p.on('error', function(err) {
+            console.log('PiCloud error');
+            console.log(err);
+            process.exit(102);
         });
     };
 }
@@ -111,7 +130,7 @@ function connectSlack(conf) {
         s.on('error', function (err) {
             console.log('Slack error');
             console.log(err);
-            process.exit(102);
+            process.exit(103);
         });
         s.login();
     };
