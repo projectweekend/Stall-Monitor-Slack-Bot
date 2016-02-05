@@ -16,10 +16,10 @@ util.inherits(PiCloud, EventEmitter);
 
 PiCloud.prototype._setupPicloudSocket = function () {
     var _this = this;
-    _this._subSocket.on('open', function() {
+    _this._socket.on('open', function() {
         _this.emit('ready');
     });
-    _this._subSocket.on('error', function(err) {
+    _this._socket.on('error', function(err) {
         _this.emit('error', err);
     });
 };

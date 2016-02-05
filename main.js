@@ -39,13 +39,13 @@ function main() {
                 waiting: false
             };
             if (userInQ(q, user)) {
-                channel.send("Calm down buddy.");
+                channel.send(utils.randomFromArray(appConf.app.messages.queued));
             } else {
                 if (services.stall.status === 'closed' || q.length() > 0 || q.running() > 0) {
                     task.waiting = true;
-                    channel.send("I'll let you know when the coast is clear.");
+                    channel.send(utils.randomFromArray(appConf.app.messages.occupied));
                 } else {
-                    channel.send("You're good to go!");
+                    channel.send(utils.randomFromArray(appConf.app.messages.available));
                 }
                 q.push(task);
                 services.picloud.pooq();
@@ -59,7 +59,7 @@ function worker(task, cb) {
     if (task.waiting) {
         var i = setInterval(function() {
             if (task.stall.status === 'open') {
-                task.channel.send("All clear. Better move quick!");
+                task.channel.send(utils.randomFromArray(appConf.app.messages.available));
                 clearInterval(i);
                 startCountdown(cb);
             }
