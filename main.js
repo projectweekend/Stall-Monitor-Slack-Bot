@@ -16,6 +16,9 @@ var appConf = config.fromFile(configFilePath);
 
 
 if (require.main === module) {
+    process.on('SIGINT', function() {
+        process.exit();
+    });
     main();
 }
 
