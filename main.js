@@ -32,54 +32,66 @@ function main() {
         services.slack.on('message', function (message) {
             var channel = services.slack.getChannelGroupOrDMByID(message.channel);
             var user = message.user;
+            if (message.text !== appConf.app.keyword) {
+                channel.send(appConf.app.messages.help);
+                return;
+            }
+            var userTask = userTaskInQ(q, user);
+            // user is either waiting, or currently being processed
+            if (userTask !== false) {
+                if (userTask.data.pooqStatus === 'go') {
+                    channel.send(utils.randomFromArray(appConf.app.messages.timeRunningOut));
+                } else {
+                    channel.send(utils.randomFromArray(appConf.app.messages.queued));
+                }
+                return;
+            }
             var task = {
                 user: user,
                 channel: channel,
                 stall: services.stall,
-                waiting: false
+                pooqStatus: ''
             };
-            if (userInQ(q, user)) {
-                channel.send(utils.randomFromArray(appConf.app.messages.queued));
+            if (services.stall.status === 'closed' || q.length() > 0 || q.running() > 0) {
+                task.pooqStatus = 'wait';
+                channel.send(utils.randomFromArray(appConf.app.messages.occupied));
             } else {
-                if (services.stall.status === 'closed' || q.length() > 0 || q.running() > 0) {
-                    task.waiting = true;
-                    channel.send(utils.randomFromArray(appConf.app.messages.occupied));
-                } else {
-                    channel.send(utils.randomFromArray(appConf.app.messages.available));
-                }
-                q.push(task);
-                services.picloud.pooq();
+                task.pooqStatus = 'go';
+                channel.send(utils.randomFromArray(appConf.app.messages.availableNow));
             }
+            q.push(task);
+            services.picloud.pooq();
         });
     });
 }
 
 
 function worker(task, cb) {
-    if (task.waiting) {
+    if (task.pooqStatus === 'wait') {
         var i = setInterval(function() {
             if (task.stall.status === 'open') {
-                task.channel.send(utils.randomFromArray(appConf.app.messages.available));
+                task.channel.send(utils.randomFromArray(appConf.app.messages.yourTurn));
                 clearInterval(i);
+                task.pooqStatus = 'go';
                 startCountdown(cb);
             }
         }, appConf.app.statusInterval);
-    } else {
+    } else if (task.pooqStatus === 'go') {
         startCountdown(cb);
     }
 }
 
 
-function userInQ(q, user) {
+function userTaskInQ(q, user) {
     var inProcess = q.workersList();
     for (var i = 0; i < inProcess.length; i++) {
         if (inProcess[i].data.user === user) {
-            return true;
+            return inProcess[i];
         }
     }
     for (var i = 0; i < q.tasks.length; i++) {
         if (q.tasks[i].data.user === user) {
-            return true;
+            return q.tasks[i];
         }
     }
     return false;
