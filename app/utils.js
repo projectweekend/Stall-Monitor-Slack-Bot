@@ -7,7 +7,6 @@ exports.socket = socket;
 
 
 function socket(config) {
-    var picloudURL = url.format(config);
-    var picloud = new WebSocket(picloudURL);
-    return picloud;
+    var socketURL = url.format(config);
+    return new WebSocket(socketURL);
 }

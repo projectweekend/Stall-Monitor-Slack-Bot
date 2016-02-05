@@ -2,7 +2,7 @@ var argv = require('minimist')(process.argv.slice(2));
 var async = require('async');
 var Slack = require('slack-client');
 var config = require('./app/config');
-var picloud = require('./app/picloud');
+var utils = require('./app/utils');
 var Stall = require('./app/stall').Stall;
 
 var configFilePath = argv.c;
@@ -85,8 +85,8 @@ function userInQ(q, user) {
 
 function connectStall(conf) {
     return function(done) {
-        var subSocket = picloud.socket(conf.sub);
-        var pubSocket = picloud.socket(conf.pub);
+        var subSocket = utils.socket(conf.sub);
+        var pubSocket = utils.socket(conf.pub);
         var s = new Stall(subSocket, pubSocket);
         s.once('ready', function () {
             console.log('Stall connected');
